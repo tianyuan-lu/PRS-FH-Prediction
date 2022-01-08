@@ -4,6 +4,8 @@ This is an R toolkit for combining parental history and existing polygenic risk 
 
 The computational scripts in the [R](R/) folder can be directly downloaded. The only prerequisite is installation of the [pracma](https://cran.r-project.org/web/packages/pracma/index.html) R pacakge.
 
+Refer to our [preprint](https://www.medrxiv.org/content/10.1101/2022.01.06.22268853v1) for detailed descriptions.
+
 ## Predicting continuous traits
 
 Predicting a continuous trait for the children requires 
