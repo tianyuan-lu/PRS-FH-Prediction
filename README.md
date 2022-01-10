@@ -6,6 +6,12 @@ The computational scripts in the [R](R/) folder can be directly downloaded. The 
 
 Refer to our [preprint](https://www.medrxiv.org/content/10.1101/2022.01.06.22268853v1) for detailed descriptions.
 
+*Contact*: 
+
+Tianyuan Lu (tianyuan.lu@mail.mcgill.ca) 
+
+Celia Greenwood (celia.greenwood@mcgill.ca)
+
 ## Predicting continuous traits
 
 Predicting a continuous trait for the children requires 
