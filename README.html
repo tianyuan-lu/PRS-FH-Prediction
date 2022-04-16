@@ -352,12 +352,15 @@ pre code {
 <h1>PRS-FH-Prediction</h1>
 <p>This is an R toolkit for combining parental history and existing polygenic risk scores for improved prediction of complex traits or disease risks.</p>
 <p>The computational scripts in the <a href="R/">R</a> folder can be directly downloaded. The only prerequisite is installation of the <a href="https://cran.r-project.org/web/packages/pracma/index.html">pracma</a> R pacakge.</p>
+<div id="method-overview" class="section level2">
+<h2>Method overview</h2>
 <p>We propose a conceptual latent factor model to account for genetic components that are not modelled by polygenic risk scores but could be inferred from parental history. Briefly, for a continuous polygenic trait, we assume that its genetic determinants can be partitioned into two orthogonal genetic components: one component captured by a polygenic risk score used for prediction, and the other component representing under-captured genetic effects. <strong>The under-captured genetic component could include the effects of unmeasured common variants, rare variants, gene-by-environment interactions, epistasis, intra-familial shared environmental or lifestyle factors, etc.</strong> We suppose that these two genetic components are independently passed on from the parents to the children, and parental measures of the trait may partially inform the under-captured genetic component. This model can be adapted for binary diseases, wherein the parental disease history may inform the underlying genetic liability.</p>
 <p>Based on this model, it follows that prediction of a continuous trait or the genetic liability for a disease can be improved by combining a polygenic risk score and family history, requiring only (1) the magnitude of association between a polygenic risk score and the target trait or disease, and (2) the magnitude of association between parents’ trait measures or disease history and the target trait or disease amongst children. Importantly, these estimates can be obtained from separate well-powered cohort studies, without the need to access individual-level information.</p>
 <p>Refer to our <a href="https://www.medrxiv.org/content/10.1101/2022.01.06.22268853v1">preprint</a> for detailed descriptions.</p>
 <p><em>Contact</em>:</p>
 <p>Tianyuan Lu (<a href="mailto:tianyuan.lu@mail.mcgill.ca" class="email">tianyuan.lu@mail.mcgill.ca</a>)</p>
 <p>Celia Greenwood (<a href="mailto:celia.greenwood@mcgill.ca" class="email">celia.greenwood@mcgill.ca</a>)</p>
+</div>
 <div id="predicting-continuous-traits" class="section level2">
 <h2>Predicting continuous traits</h2>
 <p>Predicting a continuous trait for the children requires</p>
@@ -411,17 +414,30 @@ pre code {
 </div>
 <div id="data-example" class="section level2">
 <h2>Data example</h2>
-<p>A simulated toy dataset is provided <a href="RData/simulate_phenotype.txt">here</a>. Scripts used to generate these data are stored <a href="R/simulate_phenotype.R">here</a>.</p>
-<p>Briefly, for a continuous trait, a polygenic risk score was designed to explain 9% of the trait heritability while an orthogonal genetic component was designed to explain 64% of the trait heritability. Based on the data, we can find that the score explained 9.3% of the measured trait variance, and that a mid-parental predictor explained 27.7% of the measured trait variance.</p>
+<p>A simulated toy dataset for estimating parameters is provided <a href="RData/simulate_phenotype_reference.txt">here</a> and a simulated toy data for testing prediction is provided <a href="RData/simulate_phenotype.txt">here</a>. Scripts used to generate these data are stored <a href="R/simulate_phenotype.R">here</a>.</p>
+<p>Briefly, for a continuous trait, a polygenic risk score was designed to explain 9% of the trait heritability while an orthogonal genetic component was designed to explain 64% of the trait heritability. Based on the reference data, we can find that the score explained 8.9% of the measured trait variance, and that a mid-parental predictor explained 27.2% of the measured trait variance.</p>
+<pre><code>&gt; data &lt;- read.table(&quot;simulate_phenotype_reference.txt&quot;, header = T) ### Reference dataset for parameter estimation
+&gt; cor(data$Child, data$PRS)^2 ### Proportion of variance explained by the score
+[1] 0.08947465
+&gt; data$MidParent &lt;- (data$Mother + data$Father) / 2 ### Mid-parental predictor
+&gt; cor(data$Child, data$MidParent)^2 ### Proportion of variance explained by the mid-parental predictor
+[1] 0.2719037</code></pre>
 <p>We therefore generate a joint predictor with the following command using command line:</p>
-<pre class="ruby"><code>Rscript predict_continuous.R 0.093 0.277 simulate_phenotype.txt</code></pre>
+<pre class="ruby"><code>Rscript predict_continuous.R 0.089 0.272 simulate_phenotype.txt</code></pre>
 <p>This should lead to an RData file similar to the <a href="RData/simulate_phenotype.txt.joint.pred.continuous.RData">output</a>.</p>
 <p>And the joint predictor should explain 31.2% of the measured trait variance in the given dataset.</p>
-<p>A binary outcome was simulated based on the above continuous trait with a baseline log-odds designed to be -1. Based on the data, we can find that per one standard deviation increase in the polygenic risk score is associated with a log-odds ratio of 0.247; having a parental disease history is associated with a log-odds ratio of 0.266; and the estimated baseline log-odds is -1.035. We do not consider sex effect in this example.</p>
+<p>A binary outcome was simulated based on the above continuous trait with a baseline log-odds designed to be -1. Based on the data, we can find that per one standard deviation increase in the polygenic risk score is associated with a log-odds ratio of 0.233; having a parental disease history is associated with a log-odds ratio of 0.262; and the estimated baseline log-odds is -0.996. We do not consider sex effect in this example.</p>
+<pre><code>&gt; data &lt;- read.table(&quot;simulate_phenotype_reference.txt&quot;, header = T) ### Reference dataset for parameter estimation
+&gt; coef(summary(glm(Child_Disease ~ PRS, family = binomial, data = data)))[2,1] ### log-odds ratio associated with one standard deviation increase in the score
+[1] 0.233022
+&gt; mean(coef(summary(glm(Child_Disease ~ Mother_Disease + Father_Disease, family = binomial, data = data)))[2:3,1]) ### log-odds ratio associated with parental disease history
+[1] 0.2622773
+&gt; coef(summary(glm(Child_Disease ~ Mother_Disease + Father_Disease, family = binomial, data = data)))[1,1] ### baseline log-odds
+[1] -0.9956813</code></pre>
 <p>We therefore generate a joint predictor with the following command using command line:</p>
-<pre class="ruby"><code>Rscript predict_binary.R -1.035 0.247 0.266 0 simulate_phenotype.txt</code></pre>
+<pre class="ruby"><code>Rscript predict_binary.R -0.996 0.233 0.262 0 simulate_phenotype.txt</code></pre>
 <p>This should lead to an RData file similar to the <a href="RData/simulate_phenotype.txt.joint.pred.binary.RData">output</a>.</p>
-<p>And the joint predictor should achieve an area under the receiver operating characteristic curve of 0.5744, higher than 0.5702 by the polygenic risk score alone.</p>
+<p>And the joint predictor should achieve an area under the receiver operating characteristic curve of 0.5739, higher than 0.5702 by the polygenic risk score alone.</p>
 </div>
 <div id="estimating-disease-heritability-using-family-disease-history" class="section level2">
 <h2>Estimating disease heritability using family disease history</h2>
