@@ -1,4 +1,4 @@
-# PRS-FH-Prediction
+# FHPRS: Family History-assisted Polygenic Risk Score
 
 This is an R toolkit for combining parental history and existing polygenic risk scores for improved prediction of complex traits or disease risks.
 
